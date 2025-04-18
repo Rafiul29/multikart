@@ -10,7 +10,7 @@ class Vendor(models.Model):
       return f"{self.user.username}---{self.store_name}"
 
 class Product(models.Model):
-    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='products')
+    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='products',blank=True,null=True)
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -18,4 +18,7 @@ class Product(models.Model):
 
     def __str__(self):
        return f"{self.vendor.store_name} by product {self.name}"
+    
+
+    
 

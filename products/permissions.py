@@ -10,3 +10,6 @@ class IsOwnVendor(BasePermission):
         # Allow if admin or owner of the vendor profile
         return request.user.role == "admin" or obj.user == request.user
 
+class IsOwnProduct(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return obj.vendor.user == request.user
