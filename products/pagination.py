@@ -15,9 +15,18 @@ def generate_pagination_response(self, data, message):
 
 
 class VendorPagination(PageNumberPagination):
-    page_size = 1  # default items per page
+    page_size = 2  # default items per page
     page_size_query_param = 'page_size'
     max_page_size = 100
 
     def get_paginated_response(self, data):
         return generate_pagination_response(self=self, data=data, message='Fetched vendors successfully.')
+
+
+class ProductPagination(PageNumberPagination):
+    page_size = 2  # default items per page
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+    def get_paginated_response(self, data):
+        return generate_pagination_response(self=self, data=data, message='Fetched Product successfully.')

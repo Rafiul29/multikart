@@ -8,7 +8,7 @@ from .models import Vendor, Product
 from accounts.models import CustomUser
 from .serializers import VendorSerializer,ProductSerializer
 from .permissions import IsAdmin, IsOwnVendor, IsOwnProduct
-from .pagination import VendorPagination
+from .pagination import VendorPagination,ProductPagination
 
 
 
@@ -18,6 +18,7 @@ class VendorViewSet(viewsets.ModelViewSet):
     serializer_class = VendorSerializer
     pagination_class = VendorPagination
    
+    #  set up a custom permission
     def get_permissions(self):
         user = self.request.user
 
@@ -146,8 +147,7 @@ class VendorViewSet(viewsets.ModelViewSet):
             return Response({"error": "Vendor not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-
-
+# Modify Custom error response
 def flatten_errors(error_dict):
     flat_errors = {}
     for field, errors in error_dict.items():
@@ -162,12 +162,12 @@ def flatten_errors(error_dict):
             flat_errors[field] = str(errors)
     return flat_errors
 
-
 # Product view Set
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
-    pagination_class = VendorPagination
+    pagination_class = ProductPagination
 
+    #set up a custom permission
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [AllowAny()]  # Anyone can view products
@@ -176,8 +176,10 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         user = self.request.user
 
+        # if user role is admin can perform all method post,get,delete update
         if user.role == "admin":
             return [IsAuthenticated(), IsAdmin(),AllowAny()]
+        # if user  role is vendor can perform method post,get delete, update his own product
         elif user.role == "vendor":
             if self.action in ['create','update', 'partial_update', 'destroy']:
                 return [IsAuthenticated(), IsOwnProduct()]
@@ -197,9 +199,9 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Product.objects.filter(vendor__user=user)
         elif user.role == "customer":
             return Product.objects.all()
-
         return Product.objects.none()
     
+    # create new Product
     def create(self, request, *args, **kwargs):
         user = request.user
 
@@ -233,6 +235,107 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         response_serializer = ProductSerializer(product)
         return Response({"data": response_serializer.data, "success": "Product created."}, status=status.HTTP_201_CREATED)
+
+    # #  retrive single Product Get(id)
+    # def retrieve(self, request, pk=None):
+    #     try:
+    #         user = self.request.user
+    #         # First, check if the user is authenticated
+    #         if user.is_authenticated:
+    #             # Then, check if the user is a vendor
+    #             if user.role == "vendor":
+    #                 product = Product.objects.get(pk=pk, vendor__user=user)
+    #                 print(product, 'Product for vendor')
+    #             else:
+    #                 # Handle case where the user is authenticated but not a vendor
+    #                 return Response({"error": "You are not authorized to view this product."}, status=status.HTTP_403_FORBIDDEN)
+    #         else:
+    #             # If the user is not authenticated
+    #             return Response({"error": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
+
+    #         print(product, user.role)
+    #         self.check_object_permissions(request, product)
+    #         serializer = self.get_serializer(product)
+    #         return Response({"data": serializer.data, "success": "product details fetched."})
+    #     except Product.DoesNotExist:
+    #         return Response({"error": "Product not found or not owned by you."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Update product hole document
+    def update(self, request, pk=None):
+        user = request.user
+
+        # Allow only vendors or admins
+        if user.role not in ["vendor", "admin"]:
+            return Response({"error": "You do not have permission to update a product."}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            if user.role == "admin":
+                product = Product.objects.get(pk=pk)  # Admins can access any product
+            elif user.role == "vendor":
+                product = Product.objects.get(pk=pk, vendor__user=user)  # Vendors can access only their own products
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found or not owned by you."}, status=status.HTTP_404_NOT_FOUND)
+
+
+        # Validate input
+        serializer = ProductSerializer(product, data=request.data, partial=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as e:
+            flat_errors = flatten_errors(e.detail)
+            return Response({"error": flat_errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+
+        return Response({"data": serializer.data, "success": "Product updated."}, status=status.HTTP_200_OK)
+    
+    # update product selected field - Patch Method
+    def partial_update(self, request, pk=None):
+        user = request.user
+
+        # Allow only vendors or admins
+        if user.role not in ["vendor", "admin"]:
+            return Response({"error": "You do not have permission to update a product."}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            if user.role == "admin":
+                product = Product.objects.get(pk=pk)  # Admins can access any product
+            elif user.role == "vendor":
+                product = Product.objects.get(pk=pk, vendor__user=user)  # Vendors can access only their own products
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found or not owned by you."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Apply partial updates
+        product.name = request.data.get('name', product.name)
+        product.description = request.data.get('description', product.description)
+        product.price = request.data.get('price', product.price)
+        product.stock = request.data.get('stock', product.stock)
+
+        # Validation
+        if product.price <= 0:
+            return Response({"error": "Price must be greater than zero."}, status=status.HTTP_400_BAD_REQUEST)
+        if product.stock < 0:
+            return Response({"error": "Stock cannot be negative."}, status=status.HTTP_400_BAD_REQUEST)
+
+        product.save()
+        serializer = ProductSerializer(product)
+        return Response({"data": serializer.data, "success": "Product partially updated."}, status=status.HTTP_200_OK)
+
+    #  Delete a single Product - DELETE Method
+    def destroy(self, request, pk=None):
+        try:
+            product = Product.objects.get(pk=pk)
+            self.check_object_permissions(request, product)
+            product.delete()
+           
+            return Response({"success": "Product deleted."})
+        except Product.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
 
 
 
