@@ -129,8 +129,15 @@ class VendorViewSet(viewsets.ModelViewSet):
     def destroy(self, request, pk=None):
         try:
             vendor = Vendor.objects.get(pk=pk)
+            # update user role
+            user = vendor.user
+            user.role = 'customer'
+            user.save()
+            
             self.check_object_permissions(request, vendor)
             vendor.delete()
+           
+
             return Response({"success": "Vendor deleted."})
         except Vendor.DoesNotExist:
             return Response({"error": "Vendor not found"}, status=status.HTTP_404_NOT_FOUND)
