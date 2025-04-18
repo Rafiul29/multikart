@@ -11,22 +11,27 @@ class RegistrationView(APIView):
 
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
+
+        # Check if the serializer is valid
         if serializer.is_valid():
             user = serializer.save()
-            tokens = self.get_tokens_for_user(user)
-            return Response({"message": "user registered successfully!","tokens": tokens}, status=status.HTTP_201_CREATED)
+            tokens = self.get_tokens_for_user(user)  # generate the JWT token
+            return Response({"message": "User registered successfully!", "tokens": tokens}, status=status.HTTP_201_CREATED)
         
-        # flatten the error response
-        errors = {
-            field: error[0] if isinstance(error, list) and len(error) == 1 else error
-            for field, error in serializer.errors.items()
-        }
-        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        # modify the error response
+        errors = {}
+        for field, error in serializer.errors.items():
+            if isinstance(error, list):
+                errors[field] = error[0] if isinstance(error[0], str) else str(error[0])
+
+        return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def get_tokens_for_user(self, user):
         refresh = RefreshToken.for_user(user)
         return {"refresh": str(refresh), "access": str(refresh.access_token)}
     
+
+
 class LoginApiView(APIView):
 
     permission_classes = [permissions.AllowAny]
@@ -35,8 +40,15 @@ class LoginApiView(APIView):
         username = request.data.get("username")
         password = request.data.get("password")
 
+        # generate error response 
         if not username or not password:
-             return Response({"error": "please  provided valid credentials"})
+            errors = {}
+            if not username:
+                errors["username"] = "Username is required."
+            if not password:
+                errors["password"] = "Password is required."
+
+            return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
 
         user = authenticate(username=username, password=password)
 
@@ -57,7 +69,7 @@ class LoginApiView(APIView):
               'role':user.role
             } 
 
-        return Response({"message": "user login successfull","data": data, "tokens": tokens})
+        return Response({"message": "user login successful","data": data, "tokens": tokens})
 
     def get_tokens_for_user(self, user):
         refresh = RefreshToken.for_user(user)
@@ -80,21 +92,3 @@ class LogoutApiView(APIView):
 
         except TokenError:
             return Response({"error": "Invalid or expired refresh token"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# {
-#  "username":"rafiul",
-# "email":"rafiul123@gmail.com",
-#  "first_name":"Rafiul",
-# "last_name":"Islam",
-# "password":"Rafi@#12",
-# "confirm_password":"Rafi@#12"
-# }
-
-
-
-# {
-# "username":"rafiul",
-# "password":"Rafi@#12"
-# }
-#  "refresh"
