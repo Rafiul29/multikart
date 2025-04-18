@@ -51,7 +51,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return user
 
 
-
 class CustomUserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
