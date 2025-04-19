@@ -1,15 +1,17 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.exceptions import ValidationError
+from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Vendor, Product
 from accounts.models import CustomUser
-from .serializers import VendorSerializer,ProductSerializer
+from .serializers import VendorSerializer,ProductSerializer,VendorDetailSerializer
 from .permissions import IsAdmin, IsOwnVendor, IsOwnProduct
 from .pagination import VendorPagination,ProductPagination
-
+from .filters import ProductFilter
 
 
 # Vendor view Set
@@ -166,6 +168,13 @@ def flatten_errors(error_dict):
 class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     pagination_class = ProductPagination
+
+    # Product filter and searching
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = ProductFilter
+    search_fields = ['name', 'description', 'vendor__store_name']
+    ordering_fields = ['price', 'name', 'stock']
+    ordering = ['price']
 
     #set up a custom permission
     def get_permissions(self):
@@ -334,6 +343,16 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 
+class VendorProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            vendor = Vendor.objects.get(user=request.user)
+            serializer = VendorDetailSerializer(vendor)
+            return Response(serializer.data)
+        except Vendor.DoesNotExist:
+            return Response({"error": "Vendor profile not found."}, status=404)
 
 
 

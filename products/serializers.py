@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from products.models import Vendor,Product
 from accounts.serializers import CustomUserDetailsSerializer
-
+from orders.serializers import OrderSerializer
 
 # VendorSerialzer that include User details
 class VendorSerializer(serializers.ModelSerializer):
@@ -35,7 +35,9 @@ class ProductSerializer(serializers.ModelSerializer):
 # VendorSerializer that includes Products details
 class VendorDetailSerializer(serializers.ModelSerializer):
     products = ProductSerializer(many=True)  
+    user = CustomUserDetailsSerializer(read_only=True)
 
     class Meta:
         model = Vendor
         fields = ['id', 'store_name', 'user', 'products'] # Select only the necessary fields
+        
