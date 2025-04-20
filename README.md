@@ -44,6 +44,7 @@ A role-based eCommerce API built using Django REST Framework with JWT authentica
 - Redis (for caching, optional)
 - django-filter
 - drf-throttling
+- django-signal
 
 ---
 ## 🐍 Python Virtual Environment Setup
