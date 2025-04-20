@@ -117,7 +117,30 @@ Open your browser and navigate to http://localhost:8000/ to access the API.
 
 --- 
 ## 🚀 Base URL
+
+### Localhost URL
 `http://127.0.0.1:8000`
+### Deploy URL
+`https://multikart-3h7c.onrender.com/`
+
+## 👤 User Credentials
+
+### 🔐 Super Admin
+- **Username:** `rafi`
+- **Email:** `rafi@gmail.com`
+- **Password:** `123`
+
+### 🛍️ Vendor
+- **Username:** `rafiul1`
+- **Email:** `rafiul1123@gmail.com`
+- **Password:** `Rafi@#12`
+
+### 🧑 Customer
+- **Username:** `sadman`
+- **Email:** `sadman@gmail.com`
+- **Password:** `Rafi@#12`
+
+
 
 ## 🔐 User Authentication
 
