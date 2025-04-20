@@ -10,11 +10,11 @@ def notify_vendor_on_orderitem_created(sender, instance, created, **kwargs):
         vendor = instance.product.vendor
         email = vendor.user.email
 
-        if email:
-            send_mail(
-                subject='📦 New Order Received!',
-                message=f'Dear {vendor.store_name},\n\nYou have a new order containing your product(s).',
-                from_email='no-reply@snapmart.com',
-                recipient_list=[email],
-                fail_silently=False,
-            )
+        # if email:
+        #     send_mail(
+        #         subject='📦 New Order Received!',
+        #         message=f'Dear {vendor.store_name},\n\nYou have a new order containing your product(s).',
+        #         from_email='no-reply@snapmart.com',
+        #         recipient_list=[email],
+        #         fail_silently=False,
+        #     )
