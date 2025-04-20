@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Order, OrderItem
-from accounts.serializers import CustomUserDetailsSerializer
+from apps.accounts.serializers import CustomUserDetailsSerializer
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)

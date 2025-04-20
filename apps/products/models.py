@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from accounts.models import CustomUser
+from apps.accounts.models import CustomUser
 
 class Vendor(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='vendor_profile')

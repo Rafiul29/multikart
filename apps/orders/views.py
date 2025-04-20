@@ -6,7 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from .models import Order, OrderItem
 from .serializers import OrderSerializer
-from products.models import Product
+from apps.products.models import Product
 from  .pagination import OrderPagination
 from .permission import IsAdmin,IsOwnOrder,IsVendorOrder
 

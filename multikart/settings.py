@@ -58,9 +58,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'accounts',
-    'products',
-    'orders'
+    'apps.accounts',
+    'apps.products',
+    'apps.orders'
 ]
 
 MIDDLEWARE = [
@@ -116,7 +116,7 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_THROTTLE_RATES': {
-        'user': '5/day',
+        'user': '50/day',
     },
 
     # Pagination (can override per-view or serializer)

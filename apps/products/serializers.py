@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from products.models import Vendor,Product
-from accounts.serializers import CustomUserDetailsSerializer
-from orders.serializers import OrderSerializer
+from apps.products.models import Vendor,Product
+from apps.accounts.serializers import CustomUserDetailsSerializer
+from apps.orders.serializers import OrderSerializer
 
 # VendorSerialzer that include User details
 class VendorSerializer(serializers.ModelSerializer):

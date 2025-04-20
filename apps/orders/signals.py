@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
-from .models import Order, OrderItem
+from apps.orders.models import Order, OrderItem
 
 @receiver(post_save, sender=OrderItem)
 def notify_vendor_on_orderitem_created(sender, instance, created, **kwargs):

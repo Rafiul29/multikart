@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Vendor, Product
-from accounts.models import CustomUser
+from apps.accounts.models import CustomUser
 from .serializers import VendorSerializer,ProductSerializer,VendorDetailSerializer
 from .permissions import IsAdmin, IsOwnVendor, IsOwnProduct
 from .pagination import VendorPagination,ProductPagination
