@@ -25,15 +25,22 @@ SECRET_KEY = 'django-insecure-&y0fqm8x_(239^7_(39pizuc=)4&%s+aw7+he%f)idw8jvj3$^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'multikart-3h7c.onrender.com'
+]
+
+
 CORS_ORIGIN_WHITELIST = (
   "http://localhost:5173",
     "http://localhost:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    'https://multikart-3h7c.onrender.com'
 )
 
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000',"http://localhost:8000"]
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000',"http://localhost:8000",'https://multikart-3h7c.onrender.com']
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
