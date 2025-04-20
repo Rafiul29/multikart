@@ -1,20 +1,40 @@
-# 🛒 Multi-Tenant E-commerce API with Role-Based Access Control (RBAC)
-A scalable, secure Django REST Framework-based API for a multi-tenant e-commerce platform that allows multiple vendors to manage their own products and orders, with advanced role-based access control (RBAC).
+# 🛒 Django Multi-Role eCommerce API
 
----
+A role-based eCommerce API built using Django REST Framework with JWT authentication. Features include product management, order processing, custom permissions, throttling, and vendor notifications using signals.
 
 ## 🚀 Features
-- 🔐 **JWT Authentication** using `djangorestframework-simplejwt`
-- 👤 **Role-Based Access Control**:
-  - **Admin**: Manage and view all vendors, products, and orders
-  - **Vendor**: Manage only their own products and orders
-  - **Customer**: Place orders but cannot modify products
-- 🧩 **Multi-Tenant Architecture**
-- 📦 **Product and Order Management**
-- 🚦 **Throttling & Rate Limiting**
-- ⚡ **Optimized Queries & Pagination**
-- 🔍 **Search & Filtering Support**
+
+- JWT Authentication using `djangorestframework-simplejwt`
+- Role-based access: **Admin**, **Vendor**, **Customer**
+- Product & Order management
+- Custom permissions for secure data access
+- Throttling and rate limiting
+- Pagination and search/filtering for products
+- Vendor email notifications on new orders (via Django signals)
+- Optimized queries to avoid N+1 issues
+
 ---
+
+## 🔐 User Roles & Permissions
+
+| Role     | Permissions                                                                 |
+|----------|------------------------------------------------------------------------------|
+| Admin    | Manage all users, vendors, products, and orders                             |
+| Vendor   | Manage only their own products and view orders that contain their products  |
+| Customer | Browse products, place orders, view their own orders                        |
+
+---
+
+## 🧱 Models
+
+- **User** (Extended from `AbstractBaseUser` or built-in)
+- **Vendor** (FK to User)
+- **Product** (Each product belongs to a Vendor)
+- **Order** (Belongs to a Customer; contains many OrderItems)
+- **OrderItem** (Links Products with Orders)
+
+---
+
 
 ## 🏗️ Tech Stack
 - Django
@@ -26,6 +46,35 @@ A scalable, secure Django REST Framework-based API for a multi-tenant e-commerce
 - drf-throttling
 
 ---
+## 🐍 Python Virtual Environment Setup
+
+### 📦 Create a virtual environment
+
+```bash
+python -m venv venv
+```
+
+### ✅ Activate the virtual environment
+
+#### 🔹 On macOS/Linux:
+```bash
+source venv/bin/activate
+```
+
+#### 🔸 On Windows (CMD):
+```cmd
+venv\Scripts\activate
+```
+
+#### 🟣 On Windows (PowerShell):
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+### ❎ Deactivate the virtual environment
+```bash
+deactivate
+```
 
 
 ## Installation
@@ -50,8 +99,6 @@ DATABASES = {
     }
 }
 ```
-
-
 4. **Run migrations:**
 Create the necessary database tables by running the following commands:
 ```sh
@@ -394,7 +441,94 @@ DELETE /api/v1/vendor/1/
   "detail": "You do not have permission to perform this action."
 }
 ```
+#### Vendor Profile
 
+- **URL:** `/api/v1/profile/vendor/`
+- **Method:** `GET`
+- **Access:** Vendor Only
+#### 🟢 Response 200 OK
+```sh
+{
+    "id": 15,
+    "store_name": "ShopVista",
+    "user": {
+        "id": 3,
+        "username": "rafiul1",
+        "email": "rafiul1123@gmail.com",
+        "first_name": "Rafiul",
+        "last_name": "Islam"
+    },
+    "products": [
+        {
+            "id": 8,
+            "name": "Product-5Jmzpj",
+            "description": "Description: NqKbRvfEey1ke8hYGhU0",
+            "price": "1946.00",
+            "stock": 18,
+            "vendor": {
+                "id": 15,
+                "store_name": "ShopVista",
+                "user": {
+                    "id": 3,
+                    "username": "rafiul1",
+                    "email": "rafiul1123@gmail.com",
+                    "first_name": "Rafiul",
+                    "last_name": "Islam"
+                }
+            }
+        },
+        {
+            "id": 9,
+            "name": "Product-vZYXhj",
+            "description": "Description: 3h2epQ8RLPY84q2YL7E8",
+            "price": "270.00",
+            "stock": 1,
+            "vendor": {
+                "id": 15,
+                "store_name": "ShopVista",
+                "user": {
+                    "id": 3,
+                    "username": "rafiul1",
+                    "email": "rafiul1123@gmail.com",
+                    "first_name": "Rafiul",
+                    "last_name": "Islam"
+                }
+            }
+        },
+        {
+            "id": 10,
+            "name": "Product-hbJiCL",
+            "description": "Description: X8pFgLnBSpj8r2PjWWxO",
+            "price": "681.00",
+            "stock": 29,
+            "vendor": {
+                "id": 15,
+                "store_name": "ShopVista",
+                "user": {
+                    "id": 3,
+                    "username": "rafiul1",
+                    "email": "rafiul1123@gmail.com",
+                    "first_name": "Rafiul",
+                    "last_name": "Islam"
+                }
+            }
+        }
+    ]
+}
+```
+
+#### 🔴 Response 404 Not Found
+```json
+{
+    "error": "Vendor profile not found."
+}
+```
+#### 🔴 Response 403 Forbidden
+```json
+{
+      "error": "Authentication required."
+}
+```
 
 ## 🛒 Product API
 
@@ -495,6 +629,13 @@ GET /api/v1/products/1/
 ```json
 {
   "detail": "Product not found."
+}
+```
+
+#### 🔴 Response 429 Too Many Requests
+```json
+{
+    "detail": "Request was throttled. Expected available in 86384 seconds."
 }
 ```
 
@@ -877,4 +1018,3 @@ DELETE /api/v1/products/1/
     "error": "Order not found."
 }
 ```
-
